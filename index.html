@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Registro Pro V2.6 Master - Final</title>
+<style>
+/* 1. RESET Y ESTÉTICA DE ENTRADA */
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+:root {
+  --bg: #0a0a0c; --card: #1c222d; --primary: #007aff; 
+  --glass: rgba(255, 255, 255, 0.03); --border: rgba(255, 255, 255, 0.08);
+  --text: #ffffff; --danger: #ff3b30; --success: #34c759;
+}
+body {
+  margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: #000; background-image: radial-gradient(circle at 50% -20%, #1c222d, #000);
+  color: var(--text); min-height: 100vh; overflow: hidden;
+}
+
+/* 2. HEADER Y HOME */
+header { 
+  padding: 20px; background: rgba(10, 10, 12, 0.7); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border);
+}
+main {
+  padding: 20px; display: grid; grid-template-columns: repeat(auto-fill, minmax(105px, 1fr)); gap: 12px;
+  height: calc(100vh - 85px); overflow-y: auto; scrollbar-width: none; animation: fadeInApp 0.8s ease-out;
+}
+@keyframes fadeInApp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+.card {
+  background: var(--card); border: 1px solid var(--border); border-radius: 24px; padding: 20px;
+  text-align: center; cursor: pointer; aspect-ratio: 1 / 1.1; display: flex; flex-direction: column; 
+  align-items: center; justify-content: center; transition: 0.2s;
+}
+.card:active { transform: scale(0.92); }
+.card h3 { font-size: 34px; margin: 0; }
+.card p { margin: 10px 0 0 0; font-size: 11px; font-weight: 600; color: #888; text-transform: uppercase; }
+
+/* 3. MODALES Y SCROLL INDEPENDIENTE */
+.modal { position: fixed; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); display: none; align-items: center; justify-content: center; z-index: 2000; }
+.modalContent { 
+  background: #161b22; border: 1px solid var(--border); width: 92%; max-width: 400px; 
+  border-radius: 35px; height: 82vh; display: flex; flex-direction: column; overflow: hidden;
+}
+.tab-body { flex: 1; overflow-y: auto; padding: 10px 24px 30px; scrollbar-width: none; }
+.tab-body::-webkit-scrollbar { display: none; }
+
+/* 4. INPUTS Y BOTONES */
+input, select { 
+  width: 100%; padding: 16px; border-radius: 16px; border: 1px solid var(--border); 
+  background: rgba(255,255,255,0.03); color: #fff; margin-top: 10px; font-size: 15px; outline: none;
+}
+.section-title { font-size: 10px; color: var(--primary); font-weight: 800; text-transform: uppercase; margin-top: 20px; display: block; }
+button.action-btn { width: 100%; margin-top: 15px; padding: 16px; border-radius: 18px; border: none; background: var(--primary); color: #fff; font-weight: 700; cursor: pointer; }
+#btnConfig { border: none; background: var(--glass); color: #fff; border-radius: 14px; width: 44px; height: 44px; font-size: 18px; display: grid; place-items: center; }
+
+#confirmModal { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: none; align-items: center; justify-content: center; z-index: 5000; backdrop-filter: blur(15px); }
+.confirmContent { background: #1c222d; width: 85%; max-width: 320px; border-radius: 26px; padding: 30px; border: 1px solid var(--danger); text-align: center; }
+</style>
+
+    <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="assets/icon-192.png">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#d4af37">
+    <script>if('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js');</script>
+</head>
+<body>
+
+<header>
+  <span style="letter-spacing:1px">REGISTRO PRO V2.6 MASTER</span>
+  <button id="btnConfig" onclick="openConfig()">⚙️</button>
+</header>
+
+<main id="main"></main>
+
+<!-- MODAL CONFIGURACIÓN -->
+<div class="modal" id="configModal">
+<div class="modalContent">
+  <div style="padding: 20px 24px 10px; display: flex; justify-content: space-between; align-items: center;">
+    <div style="font-size: 12px; font-weight: 800; color: var(--primary); text-transform: uppercase;">Ajustes</div>
+    <button style="background: #2d3442; border: none; color: #fff; width: 32px; height: 32px; border-radius: 10px;" onclick="closeConfig()">✕</button>
+  </div>
+  
+  <div style="display: flex; gap: 8px; overflow-x: auto; padding: 10px 20px; border-bottom: 1px solid var(--border); scrollbar-width: none;">
+    <button class="tab-btn active" onclick="switchTab('tab-win', this)" style="background:var(--primary); color:#fff; border-radius:12px; padding:10px 18px; font-size:11px; border:none; white-space:nowrap; font-weight:600;">Ventanas</button>
+    <button class="tab-btn" onclick="switchTab('tab-pre', this)" style="background:rgba(255,255,255,0.05); color:#888; border-radius:12px; padding:10px 18px; font-size:11px; border:none; white-space:nowrap; font-weight:600;">Biblioteca</button>
+    <button class="tab-btn" onclick="switchTab('tab-fields', this)" style="background:rgba(255,255,255,0.05); color:#888; border-radius:12px; padding:10px 18px; font-size:11px; border:none; white-space:nowrap; font-weight:600;">Asignar</button>
+    <button class="tab-btn" onclick="switchTab('tab-wsap', this)" style="background:rgba(255,255,255,0.05); color:#888; border-radius:12px; padding:10px 18px; font-size:11px; border:none; white-space:nowrap; font-weight:600;">Compartir</button>
+  </div>
+  
+  <div class="tab-body">
+    <div id="tab-win" class="tab-content active" style="display:block">
+      <span class="section-title">Nueva Ventana</span>
+      <input id="vName" placeholder="Nombre">
+      <input id="vIcon" placeholder="Emoji">
+      <button class="action-btn" onclick="addWindow()">Crear Ventana</button>
+      <span class="section-title">Eliminar</span>
+      <select id="delWinSelect"></select>
+      <button class="action-btn" onclick="askDeleteWindow()" style="background:var(--danger)">Eliminar Seleccionada</button>
+    </div>
+    
+    <div id="tab-pre" class="tab-content" style="display:none">
+      <span class="section-title">Campo Maestro</span>
+      <input id="pName" placeholder="Nombre (ej. Nombre, Cédula)">
+      <input id="pIcon" placeholder="Emoji">
+      <select id="pType">
+          <option value="text">🔡 Texto</option>
+          <option value="number">🔢 Número</option>
+          <option value="auto">🕒 Fecha/Hora Auto</option>
+      </select>
+      <button class="action-btn" onclick="addPreset()" style="background:var(--success)">+ Guardar en Biblioteca</button>
+      <div id="masterList" style="margin-top:15px"></div>
+    </div>
+
+    <div id="tab-fields" class="tab-content" style="display:none">
+      <span class="section-title">1. Ventana Destino</span>
+      <select id="fieldWin" onchange="refreshSubList()"></select>
+      <span class="section-title">2. Biblioteca de Origen</span>
+      <select id="preSelect"></select>
+      <button class="action-btn" onclick="linkField()">Vincular Campo ✅</button>
+      <div id="assignedFieldsList" style="margin-top:15px;"></div>
+    </div>
+
+    <div id="tab-wsap" class="tab-content" style="display:none">
+      <span class="section-title">WhatsApp Destino</span>
+      <input id="wsap" placeholder="+573000000000">
+      
+      <div style="margin-top: 25px; border-top: 1px solid var(--border); padding-top: 15px;">
+        <span class="section-title">Sincronizar Dispositivos</span>
+        <button class="action-btn" onclick="exportData()" style="background:#2d3442;">📋 Copiar Código de App</button>
+        <input id="importBox" placeholder="Pega el código aquí para importar..." style="margin-top:15px">
+        <button class="action-btn" onclick="importData()" style="background:var(--success)">📥 Importar Configuración</button>
+      </div>
+
+      <button class="action-btn" onclick="masterReset()" style="background:var(--danger); margin-top:30px;">⚠️ Reiniciar Todo</button>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- MODAL REGISTRO DIARIO -->
+<div class="modal" id="registerModal">
+  <div class="modalContent" style="height: auto; max-height: 85vh;">
+    <div style="padding: 20px 24px; display: flex; justify-content: space-between; align-items: center;">
+      <div id="regTitle" style="font-weight:bold; color:var(--primary); font-size:14px; text-transform:uppercase;">Registrar</div>
+      <button style="background:none; border:none; color:#fff; font-size:20px;" onclick="closeReg()">✕</button>
+    </div>
+    <div class="tab-body" id="regForm"></div>
+    <div style="padding: 0 24px 24px;"><button class="action-btn" onclick="sendToWS()" style="background:var(--success)">Enviar a WhatsApp 🚀</button></div>
+  </div>
+</div>
+
+<!-- MODAL CONFIRMACIÓN -->
+<div id="confirmModal">
+  <div class="confirmContent">
+    <h3 style="color: #fff; margin: 0 0 20px;">¿Borrar todo?</h3>
+    <div style="display:flex; gap:10px;">
+      <button onclick="closeConfirm()" style="background:#2d3442; flex:1; padding:12px; border-radius:12px; border:none; color:#fff;">No</button>
+      <button onclick="executeReset()" style="background:var(--danger); flex:1; padding:12px; border-radius:12px; border:none; color:#fff;">Sí</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let data = JSON.parse(localStorage.getItem("appDataV10")) || {windows:[], wsap:"", presets:[]};
+let activeIdx = null;
+
+const save = () => localStorage.setItem("appDataV10", JSON.stringify(data));
+
+function switchTab(id, btn) {
+  document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
+  document.querySelectorAll('.tab-btn').forEach(b => {
+    b.style.background = 'rgba(255,255,255,0.05)'; b.style.color = '#888';
+  });
+  document.getElementById(id).style.display = 'block';
+  btn.style.background = 'var(--primary)'; btn.style.color = '#fff';
+  if(id === 'tab-fields' || id === 'tab-pre') refreshSelectors();
+}
+
+function refreshSelectors() {
+  const wOpt = data.windows.map((w,i) => `<option value="${i}">${w.icon} ${w.name}</option>`).join("");
+  fieldWin.innerHTML = wOpt; delWinSelect.innerHTML = wOpt;
+  preSelect.innerHTML = `<option value="">-- Seleccionar Campo --</option>` + data.presets.map((p,i) => `<option value="${i}">${p.icon} ${p.name}</option>`).join("");
+  masterList.innerHTML = data.presets.map((p,i) => `<div style="display:flex; justify-content:space-between; margin-bottom:8px; background:rgba(255,255,255,0.05); padding:12px; border-radius:14px;"><span>${p.icon} ${p.name}</span><button onclick="delPre(${i})" style="color:var(--danger); background:none; border:none;">✕</button></div>`).join("");
+}
+
+function addWindow() {
+  if(!vName.value) return;
+  data.windows.push({name: vName.value, icon: vIcon.value || '📁', fields: []});
+  vName.value = ""; vIcon.value = ""; save(); render(); refreshSelectors();
+}
+
+function askDeleteWindow() {
+  if(delWinSelect.value !== "") { data.windows.splice(delWinSelect.value, 1); save(); render(); refreshSelectors(); }
+}
+
+function addPreset() {
+  if(!pName.value) return;
+  data.presets.push({name: pName.value, icon: pIcon.value || "🔹", type: pType.value});
+  pName.value = ""; pIcon.value = ""; save(); refreshSelectors();
+}
+
+function delPre(i) { data.presets.splice(i,1); save(); refreshSelectors(); }
+
+function linkField() {
+  const wI = fieldWin.value; const pI = preSelect.value;
+  if(wI !== "" && pI !== "") { data.windows[wI].fields.push({...data.presets[pI]}); save(); refreshSubList(); } 
+}
+
+function refreshSubList() {
+  const wI = fieldWin.value;
+  if(wI === "" || !data.windows[wI]) { assignedFieldsList.innerHTML = ""; return; }
+  assignedFieldsList.innerHTML = data.windows[wI].fields.map((f,i) => `
+    <div style="display:flex; justify-content:space-between; margin-bottom:8px; background:rgba(255,255,255,0.05); padding:12px; border-radius:14px;">
+      <span>${f.icon} ${f.name}</span><button onclick="unlink(${wI},${i})" style="color:var(--danger); background:none; border:none; font-weight:bold;">✕</button>
+    </div>
+  `).join("");
+}
+
+function unlink(wI, fI) { data.windows[wI].fields.splice(fI, 1); save(); refreshSubList(); }
+
+function openReg(i) {
+  activeIdx = i; const win = data.windows[i]; regTitle.innerText = win.icon + " " + win.name;
+  regForm.innerHTML = win.fields.map((f, fi) => {
+    if(f.type === 'auto') return `<div style="margin-top:12px"><small style="color:var(--primary); font-weight:bold; font-size:10px;">${f.icon} ${f.name}</small><input readonly value="${new Date().toLocaleString()}" data-fid="${fi}" style="opacity:0.7"></div>`;
+    return `<div style="margin-top:12px"><small style="color:var(--primary); font-weight:bold; font-size:10px;">${f.icon} ${f.name}</small><input type="${f.type === 'number' ? 'number' : 'text'}" data-fid="${fi}" placeholder="Escribir..."></div>`;
+  }).join("") || "<center style='padding:40px; color:#555;'>No hay campos configurados</center>";
+  document.getElementById("registerModal").style.display = "flex";
+}
+
+function closeReg() { document.getElementById("registerModal").style.display = "none"; }
+
+function sendToWS() {
+  const win = data.windows[activeIdx]; if(!data.wsap) return alert("Configura el WhatsApp primero");
+  let text = `*${win.icon} ${win.name.toUpperCase()}*%0A%0A`;
+  document.querySelectorAll("#regForm input").forEach(inp => { text += `*${win.fields[inp.dataset.fid].name}:* ${inp.value}%0A`; });
+  window.open(`https://wa.me/${data.wsap.replace('+','')}?text=${text}`); closeReg();
+}
+
+function exportData() {
+  const code = btoa(unescape(encodeURIComponent(JSON.stringify(data))));
+  navigator.clipboard.writeText(code);
+  alert("📋 Código de Configuración copiado. Envíalo al otro dispositivo.");
+}
+
+function importData() {
+  const code = document.getElementById('importBox').value.trim();
+  if (!code) return alert("Pega el código primero");
+  try {
+    const decoded = JSON.parse(decodeURIComponent(escape(atob(code))));
+    if (decoded.windows) { data = decoded; save(); alert("🚀 Configuración Importada"); location.reload(); }
+  } catch (e) { alert("❌ Código inválido"); }
+}
+
+function masterReset() { document.getElementById("confirmModal").style.display = "flex"; }
+function closeConfirm() { document.getElementById("confirmModal").style.display = "none"; }
+function executeReset() { localStorage.removeItem("appDataV10"); location.reload(); }
+
+function render() {
+  main.innerHTML = data.windows.map((w,i) => `<div class="card" onclick="openReg(${i})"><h3>${w.icon}</h3><p>${w.name}</p></div>`).join("") || "<center style='grid-column:1/-1; margin-top:50px; color:#555'>Pulsa ⚙️ para empezar</center>";
+}
+
+function openConfig() { wsap.value = data.wsap; refreshSelectors(); document.getElementById("configModal").style.display = "flex"; }
+function closeConfig() { data.wsap = wsap.value; save(); render(); document.getElementById("configModal").style.display = "none"; }
+
+window.onload = render;
+</script>
+</body>
+</html>
